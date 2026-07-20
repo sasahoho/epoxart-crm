@@ -1,19 +1,59 @@
 'use client';
 
 import Image from 'next/image';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 
-const projects = [
+const inspirations = [
   { title: 'Garage en flocons', description: 'Un fini propre, uniforme et durable pour un garage moderne.', src: '/images/garage-flocons.jpeg' },
   { title: 'Escaliers en flocons', description: 'Une finition texturée qui transforme complètement une entrée extérieure.', src: '/images/escaliers-flocons.jpeg' },
   { title: 'Époxy métallique noir', description: 'Un effet profond, brillant et haut de gamme qui attire immédiatement le regard.', src: '/images/epoxy-metallique-noir.jpeg' },
   { title: 'Époxy métallique sur mesure', description: 'Des mouvements uniques qui donnent à chaque surface une identité distincte.', src: '/images/epoxy-metallique-brillant.jpeg' }
 ];
 
+const reasons = [
+  {
+    title: 'Matériaux de qualité professionnelle',
+    description: 'Produits époxy certifiés, choisis pour leur durabilité et leur résistance à l\u2019usure, à l\u2019humidité et aux taches.'
+    // TODO: remplace par la marque exacte de produit que tu utilises si tu veux la nommer.
+  },
+  {
+    title: 'Un processus clair, du début à la fin',
+    description: 'Analyse de la surface, préparation rigoureuse du béton et suivi personnalisé à chaque étape — aucune surprise en cours de projet.'
+  },
+  {
+    title: 'Garantie sur les travaux',
+    description: 'Chaque projet est couvert par une garantie écrite sur la qualité de l\u2019installation.'
+    // TODO: précise la durée réelle de ta garantie (ex. 2 ans, 5 ans) une fois déterminée.
+  },
+  {
+    title: 'Entreprise assurée',
+    description: 'Épox\u2019Art opère avec les assurances et licences requises pour les travaux de revêtement au Québec.'
+    // TODO: ajoute ton numéro de licence RBQ et ton NEQ ici dès que disponibles — voir aussi le footer.
+  }
+];
+
 export default function HomePage() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
+
+  useEffect(() => {
+    const elements = document.querySelectorAll('.reveal');
+    if (!elements.length) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
 
   async function submitQuote(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -52,7 +92,7 @@ export default function HomePage() {
         <div className="heroOverlay" />
         <div className="heroContent">
           <p className="eyebrow">Revêtements d&apos;époxy haut de gamme</p>
-          <h1>Transformez votre surface en œuvre d&apos;art.</h1>
+          <h1>Transformez votre surface en <em>œuvre d&apos;art</em>.</h1>
           <p className="lead">Finitions en flocons et effets métalliques sur mesure pour garages, escaliers, sous-sols et espaces commerciaux.</p>
           <div className="heroActions">
             <a className="button" href="#soumission">Obtenir une soumission</a>
@@ -68,17 +108,17 @@ export default function HomePage() {
       </section>
 
       <section className="section" id="services">
-        <div className="sectionHead">
+        <div className="sectionHead reveal">
           <p className="eyebrow">Nos services</p>
           <h2>Deux univers. Une finition haut de gamme.</h2>
         </div>
         <div className="serviceShowcase">
-          <article className="serviceFeature">
+          <article className="serviceFeature reveal">
             <Image src="/images/garage-flocons.jpeg" alt="Garage avec sol en époxy flocons" fill sizes="(max-width: 900px) 100vw, 50vw" />
             <div className="serviceShade" />
             <div className="serviceContent"><span>01</span><h3>Époxy en flocons</h3><p>Un fini texturé, uniforme et durable pour garages, escaliers et entrées.</p></div>
           </article>
-          <article className="serviceFeature">
+          <article className="serviceFeature reveal">
             <Image src="/images/epoxy-metallique-noir.jpeg" alt="Garage avec sol en époxy métallique" fill sizes="(max-width: 900px) 100vw, 50vw" />
             <div className="serviceShade" />
             <div className="serviceContent"><span>02</span><h3>Époxy métallique</h3><p>Des mouvements de couleurs uniques pour créer un effet luxueux et spectaculaire.</p></div>
@@ -87,22 +127,38 @@ export default function HomePage() {
       </section>
 
       <section className="section dark" id="realisations">
-        <div className="sectionHead">
-          <p className="eyebrow">Réalisations</p>
+        <div className="sectionHead reveal">
+          <p className="eyebrow">Inspirations</p>
           <h2>Des finis qui changent complètement l&apos;espace.</h2>
+          <p className="disclaimer">Épox&apos;Art démarre ses activités : ces images illustrent des finis que nous proposons et servent d&apos;inspiration pour votre projet. Notre portfolio de réalisations sera mis à jour au fil de nos premiers chantiers.</p>
         </div>
         <div className="galleryPremium">
-          {projects.map((project, index) => (
-            <article className={`projectCard ${index === 0 ? 'featured' : ''}`} key={project.title}>
+          {inspirations.map((project, index) => (
+            <article className={`projectCard reveal ${index === 0 ? 'featured' : ''}`} key={project.title}>
               <div className="projectImage"><Image src={project.src} alt={project.title} fill sizes="(max-width: 900px) 100vw, 50vw" /></div>
-              <div className="projectText"><span>Épox&apos;Art</span><h3>{project.title}</h3><p>{project.description}</p></div>
+              <div className="projectText"><span>Inspiration</span><h3>{project.title}</h3><p>{project.description}</p></div>
             </article>
           ))}
         </div>
       </section>
 
+      <section className="section" id="pourquoi">
+        <div className="sectionHead reveal">
+          <p className="eyebrow">Pourquoi nous choisir</p>
+          <h2>Une entreprise sérieuse, même à ses débuts.</h2>
+        </div>
+        <div className="reasonsGrid">
+          {reasons.map((reason) => (
+            <div className="reasonCard reveal" key={reason.title}>
+              <h3>{reason.title}</h3>
+              <p>{reason.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="section process">
-        <div className="sectionHead"><p className="eyebrow">Notre méthode</p><h2>Simple, claire et professionnelle.</h2></div>
+        <div className="sectionHead reveal"><p className="eyebrow">Notre méthode</p><h2>Simple, claire et professionnelle.</h2></div>
         <div className="steps">
           <div><strong>01</strong><h3>Votre demande</h3><p>Vous nous transmettez les dimensions, le type de fini et des photos.</p></div>
           <div><strong>02</strong><h3>Analyse du projet</h3><p>Nous vérifions la surface, les contraintes et la finition souhaitée.</p></div>
@@ -111,7 +167,7 @@ export default function HomePage() {
       </section>
 
       <section className="section quoteSection" id="soumission">
-        <div className="quoteIntro">
+        <div className="quoteIntro reveal">
           <p className="eyebrow">Soumission gratuite</p>
           <h2>Parlez-nous de votre projet.</h2>
           <p>Remplissez le formulaire avec le plus de détails possible. Chaque projet est évalué individuellement.</p>
@@ -152,8 +208,16 @@ export default function HomePage() {
 
       <footer>
         <div className="brand footerBrand"><Image src="/brand/logo-square.jpg" alt="Épox'Art" width={46} height={46} /><span>Épox&apos;Art</span></div>
-        <p>Revêtements d&apos;époxy haut de gamme — Grand Montréal</p>
-        <a href="/admin">Accès administrateur</a>
+        <div className="footerInfo">
+          <p>Revêtements d&apos;époxy haut de gamme — Grand Montréal</p>
+          {/* TODO: remplace par ton vrai courriel de contact public si différent */}
+          <p><a href="mailto:info@epoxart.store">info@epoxart.store</a></p>
+          {/* TODO: ajoute ta licence RBQ et ton NEQ ici dès qu'ils sont attribués, ex: "RBQ 0000-0000-00 · NEQ 0000000000" */}
+        </div>
+        <div className="footerLinks">
+          <a href="/politique-confidentialite">Politique de confidentialité</a>
+          <a href="/admin">Accès administrateur</a>
+        </div>
       </footer>
     </main>
   );
