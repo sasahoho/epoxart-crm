@@ -64,7 +64,6 @@ export default function HomePage() {
       ticking = true;
       requestAnimationFrame(() => {
         setScrolled(window.scrollY > 30);
-        document.body.style.setProperty('--scroll', String(window.scrollY));
         const doc = document.documentElement;
         const max = doc.scrollHeight - doc.clientHeight;
         setProgress(max > 0 ? (window.scrollY / max) * 100 : 0);
