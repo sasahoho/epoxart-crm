@@ -38,6 +38,7 @@ export default function HomePage() {
   const [sent, setSent] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const elements = document.querySelectorAll('.reveal');
@@ -57,7 +58,31 @@ export default function HomePage() {
     return () => observer.disconnect();
   }, []);
 
-  useEffect(()=>{const mm=(e:MouseEvent)=>{document.body.style.setProperty('--mx',String(e.clientX));document.body.style.setProperty('--my',String(e.clientY));};window.addEventListener('mousemove',mm);return()=>window.removeEventListener('mousemove',mm);},[]);
+  // Le fond réagit très légèrement au curseur (quelques pixels max) —
+  // jamais un effet exagéré, juste une impression premium.
+  useEffect(() => {
+    const mm = (e: MouseEvent) => {
+      const dx = e.clientX - window.innerWidth / 2;
+      const dy = e.clientY - window.innerHeight / 2;
+      document.body.style.setProperty('--mx', String(dx));
+      document.body.style.setProperty('--my', String(dy));
+    };
+    window.addEventListener('mousemove', mm);
+    return () => window.removeEventListener('mousemove', mm);
+  }, []);
+
+  // Ferme le menu mobile si l'écran repasse en desktop
+  useEffect(() => {
+    const onResize = () => { if (window.innerWidth > 900) setMenuOpen(false); };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  // Empêche le scroll du body quand le menu mobile est ouvert
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [menuOpen]);
 
   useEffect(() => {
     let ticking = false;
@@ -106,7 +131,29 @@ export default function HomePage() {
 
   return (
     <main>
+      {/* Fond vivant — 4 couches, sous tout le contenu, réagit à la souris et au scroll */}
+      <div className="bgLayers" aria-hidden="true">
+        <div className="bgTexture" />
+        <div className="bgHalos">
+          <div className="halo halo1" />
+          <div className="halo halo2" />
+          <div className="halo halo3" />
+        </div>
+        <svg className="bgLines" viewBox="0 0 1200 900" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="0" y1="120" x2="1200" y2="0" stroke="rgba(215,169,63,0.10)" strokeWidth="1" />
+          <line x1="0" y1="340" x2="1200" y2="180" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+          <line x1="100" y1="900" x2="900" y2="260" stroke="rgba(215,169,63,0.07)" strokeWidth="1" />
+          <line x1="1200" y1="480" x2="300" y2="900" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+          <line x1="0" y1="700" x2="700" y2="900" stroke="rgba(215,169,63,0.06)" strokeWidth="1" />
+        </svg>
+        <div className="bgParticles">
+          <span className="particle p1" /><span className="particle p2" /><span className="particle p3" />
+          <span className="particle p4" /><span className="particle p5" /><span className="particle p6" />
+        </div>
+      </div>
+
       <div className="scrollProgress" style={{ width: `${progress}%` }} />
+
       <header className={`nav${scrolled ? ' scrolled' : ''}`}>
         <a href="#accueil" className="brand">
           <Image src="/brand/logo-square.jpg" alt="Logo Épox'Art" width={50} height={50} priority />
@@ -117,7 +164,23 @@ export default function HomePage() {
           <a href="#realisations">Réalisations</a>
           <a href="#soumission" className="button small">Soumission gratuite</a>
         </nav>
+        <button
+          type="button"
+          className={`navToggle${menuOpen ? ' open' : ''}`}
+          aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((v) => !v)}
+        >
+          <span />
+        </button>
       </header>
+
+      <div className={`mobileMenu${menuOpen ? ' open' : ''}`}>
+        <a href="#services" onClick={() => setMenuOpen(false)}>Services</a>
+        <a href="#realisations" onClick={() => setMenuOpen(false)}>Réalisations</a>
+        <a href="#pourquoi" onClick={() => setMenuOpen(false)}>Pourquoi nous</a>
+        <a href="#soumission" className="button" onClick={() => setMenuOpen(false)}>Soumission gratuite</a>
+      </div>
 
       <section className="hero" id="accueil" onMouseMove={handleHeroMouseMove}>
         <div className="heroBg" />
@@ -132,18 +195,19 @@ export default function HomePage() {
             <a className="ghostButton" href="#realisations">Découvrir nos finis</a>
           </div>
         </div>
+        <div className="scrollHint"><span>Découvrir</span><span className="dot" /></div>
       </section>
 
       <section className="section intro">
         <p className="eyebrow">Épox&apos;Art</p>
-        <h2>Un fini pensé pour impressionner. Une surface conçue pour durer.</h2>
+        <h2>Un fini pensé pour <em>impressionner</em>. Une surface conçue pour durer.</h2>
         <p className="introText">Chaque projet est préparé avec soin afin d&apos;obtenir une finition propre, durable et visuellement remarquable.</p>
       </section>
 
       <section className="section" id="services">
         <div className="sectionHead reveal">
           <p className="eyebrow">Nos services</p>
-          <h2>Deux univers. Une finition haut de gamme.</h2>
+          <h2>Deux univers. Une finition <em>haut de gamme</em>.</h2>
         </div>
         <div className="serviceShowcase">
           <article className="serviceFeature reveal">
@@ -183,6 +247,7 @@ export default function HomePage() {
         <div className="reasonsGrid">
           {reasons.map((reason) => (
             <div className="reasonCard reveal" key={reason.title}>
+              <div className="reasonIcon" aria-hidden="true">✦</div>
               <h3>{reason.title}</h3>
               <p>{reason.description}</p>
             </div>
@@ -202,7 +267,7 @@ export default function HomePage() {
       <section className="section quoteSection" id="soumission">
         <div className="quoteIntro reveal">
           <p className="eyebrow">Soumission gratuite</p>
-          <h2>Parlez-nous de votre projet.</h2>
+          <h2>Parlez-nous de votre <em>projet</em>.</h2>
           <p>Remplissez le formulaire avec le plus de détails possible. Chaque projet est évalué individuellement.</p>
           <ul><li>Réponse personnalisée</li><li>Possibilité d&apos;ajouter des photos</li><li>Aucun engagement</li></ul>
         </div>
