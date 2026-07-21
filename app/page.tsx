@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, MouseEvent as ReactMouseEvent, useEffect, useState } from 'react';
 
 const inspirations = [
   { title: 'Garage en flocons', description: 'Un fini propre, uniforme et durable pour un garage moderne.', src: '/images/garage-flocons.jpeg' },
@@ -36,6 +36,8 @@ export default function HomePage() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const elements = document.querySelectorAll('.reveal');
@@ -54,6 +56,31 @@ export default function HomePage() {
     elements.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 30);
+        const doc = document.documentElement;
+        const max = doc.scrollHeight - doc.clientHeight;
+        setProgress(max > 0 ? (window.scrollY / max) * 100 : 0);
+        ticking = false;
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  function handleHeroMouseMove(event: ReactMouseEvent<HTMLElement>) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+    event.currentTarget.style.setProperty('--mx', `${x}%`);
+    event.currentTarget.style.setProperty('--my', `${y}%`);
+  }
 
   async function submitQuote(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -76,7 +103,8 @@ export default function HomePage() {
 
   return (
     <main>
-      <header className="nav">
+      <div className="scrollProgress" style={{ width: `${progress}%` }} />
+      <header className={`nav${scrolled ? ' scrolled' : ''}`}>
         <a href="#accueil" className="brand">
           <Image src="/brand/logo-square.jpg" alt="Logo Épox'Art" width={50} height={50} priority />
           <span>Épox&apos;Art</span>
@@ -88,8 +116,10 @@ export default function HomePage() {
         </nav>
       </header>
 
-      <section className="hero" id="accueil">
+      <section className="hero" id="accueil" onMouseMove={handleHeroMouseMove}>
+        <div className="heroBg" />
         <div className="heroOverlay" />
+        <div className="heroGlow" />
         <div className="heroContent">
           <p className="eyebrow">Revêtements d&apos;époxy haut de gamme</p>
           <h1>Transformez votre surface en <em>œuvre d&apos;art</em>.</h1>
@@ -160,9 +190,9 @@ export default function HomePage() {
       <section className="section process">
         <div className="sectionHead reveal"><p className="eyebrow">Notre méthode</p><h2>Simple, claire et professionnelle.</h2></div>
         <div className="steps">
-          <div><strong>01</strong><h3>Votre demande</h3><p>Vous nous transmettez les dimensions, le type de fini et des photos.</p></div>
-          <div><strong>02</strong><h3>Analyse du projet</h3><p>Nous vérifions la surface, les contraintes et la finition souhaitée.</p></div>
-          <div><strong>03</strong><h3>Prise de contact</h3><p>Nous vous recontactons rapidement pour discuter des prochaines étapes.</p></div>
+          <div className="stepItem reveal"><strong>01</strong><h3>Votre demande</h3><p>Vous nous transmettez les dimensions, le type de fini et des photos.</p></div>
+          <div className="stepItem reveal"><strong>02</strong><h3>Analyse du projet</h3><p>Nous vérifions la surface, les contraintes et la finition souhaitée.</p></div>
+          <div className="stepItem reveal"><strong>03</strong><h3>Prise de contact</h3><p>Nous vous recontactons rapidement pour discuter des prochaines étapes.</p></div>
         </div>
       </section>
 
