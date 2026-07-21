@@ -57,6 +57,8 @@ export default function HomePage() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(()=>{const mm=(e:MouseEvent)=>{document.body.style.setProperty('--mx',String(e.clientX));document.body.style.setProperty('--my',String(e.clientY));};window.addEventListener('mousemove',mm);return()=>window.removeEventListener('mousemove',mm);},[]);
+
   useEffect(() => {
     let ticking = false;
     const onScroll = () => {
@@ -64,6 +66,7 @@ export default function HomePage() {
       ticking = true;
       requestAnimationFrame(() => {
         setScrolled(window.scrollY > 30);
+        document.body.style.setProperty('--scroll', String(window.scrollY));
         const doc = document.documentElement;
         const max = doc.scrollHeight - doc.clientHeight;
         setProgress(max > 0 ? (window.scrollY / max) * 100 : 0);
