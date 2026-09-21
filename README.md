@@ -1,60 +1,63 @@
-# Épox'Art — Site + CRM de soumissions
+# Épox'Art — site professionnel + soumissions + CRM
 
-Application Next.js avec :
+Site Next.js prêt à déployer avec :
 
-- site vitrine sans prix ni numéro de téléphone public;
-- formulaire de soumission gratuite avec photos;
-- enregistrement des demandes dans Supabase;
-- courriel automatique à `karassekaldas3@gmail.com` via Resend;
-- tableau de bord privé `/admin`;
-- statuts et notes internes.
+- design Épox'Art noir / or / bleu, 100 % responsive;
+- services, système de couches, méthode, garantie et FAQ;
+- formulaire de soumission gratuite complet;
+- ajout de jusqu'à 5 photos (compression dans le navigateur);
+- enregistrement des demandes et photos dans Supabase;
+- courriel automatique à l'administrateur avec **toutes les coordonnées, tous les détails, les photos en pièces jointes et des liens privés vers les photos**;
+- courriel de confirmation automatique au client;
+- tableau de bord privé `/admin` pour suivre les demandes, statuts, photos et notes internes.
 
-## 1. Sécurité immédiate
+## 1) Supabase
 
-La clé Resend envoyée dans le chat doit être **révoquée**. Crée une nouvelle clé et ajoute-la uniquement dans Vercel comme variable `RESEND_API_KEY`. Ne l'écris jamais dans GitHub.
+Crée un projet Supabase, puis exécute `supabase/schema.sql` dans **SQL Editor**.
 
-## 2. Créer la base Supabase
+Dans **Authentication > Users**, crée ton utilisateur administrateur avec le même courriel que `ADMIN_EMAIL`.
 
-Dans Supabase > SQL Editor, colle et exécute `supabase/schema.sql`.
+## 2) Resend
 
-Dans Authentication > Users, crée l'utilisateur administrateur :
+Crée un compte Resend et une clé API. Vérifie idéalement `epoxart.store` dans **Resend > Domains**.
 
-- courriel : `karassekaldas3@gmail.com`
-- mot de passe : à choisir
-- confirme l'utilisateur.
+Tant que le domaine n'est pas vérifié, utilise :
 
-## 3. Variables Vercel
+`RESEND_FROM_EMAIL=Épox'Art <onboarding@resend.dev>`
 
-Dans Vercel > Project > Settings > Environment Variables, ajoute :
+## 3) Variables d'environnement
+
+Dans Vercel > Project > Settings > Environment Variables :
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `RESEND_API_KEY`
-- `ADMIN_EMAIL` = `karassekaldas3@gmail.com`
-- `RESEND_FROM_EMAIL` = `Épox'Art <soumissions@epoxart.store>` après validation du domaine dans Resend
+- `ADMIN_EMAIL`
+- `RESEND_FROM_EMAIL`
 
-Pour les clés Supabase : Project Settings > API.
+Copie `.env.example` en `.env.local` pour tester en local.
 
-## 4. Domaine Resend
+## 4) Déploiement Vercel
 
-Dans Resend > Domains, ajoute `epoxart.store`, puis ajoute les enregistrements DNS demandés chez ton fournisseur de domaine.
+1. Mets ce dossier dans un dépôt GitHub.
+2. Importe le dépôt dans Vercel.
+3. Framework : **Next.js**.
+4. Ajoute les variables ci-dessus.
+5. Déploie.
 
-Tant que le domaine n'est pas vérifié, utilise temporairement :
+## 5) Soumissions
 
-`RESEND_FROM_EMAIL=Épox'Art <onboarding@resend.dev>`
+Le client remplit le formulaire et peut joindre jusqu'à 5 photos. Les images lourdes sont compressées côté navigateur pour garder la requête compatible avec un déploiement serverless standard.
 
-## 5. Déploiement
+À l'envoi :
 
-Téléverse le contenu de ce dossier à la racine de ton dépôt GitHub, puis importe ce dépôt dans Vercel.
+1. la demande est sauvegardée dans `quotes`;
+2. les photos sont sauvegardées dans le bucket privé `quote-photos`;
+3. l'administrateur reçoit le dossier par courriel avec les photos jointes et des liens privés valides 7 jours;
+4. le client reçoit une confirmation;
+5. la demande apparaît dans `/admin`.
 
-Réglages Vercel :
+## Sécurité
 
-- Framework Preset : Next.js
-- Root Directory : dossier contenant `package.json`
-- Build Command : par défaut
-- Output Directory : par défaut
-
-## Images
-
-Le site utilise des images d'inspiration externes. Remplace-les progressivement par tes propres réalisations. N'utilise jamais les images d'un concurrent comme si elles représentaient des travaux réalisés par Épox'Art.
+Ne publie jamais `SUPABASE_SERVICE_ROLE_KEY` ni `RESEND_API_KEY` dans GitHub. Garde-les uniquement dans les variables d'environnement de Vercel.
